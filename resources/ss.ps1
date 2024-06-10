@@ -1,6 +1,6 @@
 if (-not (Get-InstalledModule -Name AWS.Tools.Common -ErrorAction SilentlyContinue)) {
-    Install-Module -Name AWS.Tools.Installer -Force
-    Install-AWSToolsModule -Name AWS.Tools.Common,AWS.Tools.S3 -CleanUp -Force
+    Install-Module -Name AWS.Tools.Installer -Force -Confirm:$false
+    Install-AWSToolsModule -Name AWS.Tools.Common,AWS.Tools.S3 -CleanUp -Force -Confirm:$false
 }
 
 Import-Module -Name AWS.Tools.Common
